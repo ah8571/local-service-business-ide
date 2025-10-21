@@ -1,0 +1,19 @@
+{
+  "name": "local-service-business-ide-backend",
+  "version": "1.0.0",
+  "description": "Backend for Local Service Business IDE",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "author": "ah8571",
+  "license": "MIT"
+}
