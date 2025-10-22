@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ChatBox from './components/ChatBox';
+import GuidedChatBox from './components/GuidedChatBox';
 import SitePreview from './components/SitePreview';
 
 function Layout() {
@@ -48,64 +48,31 @@ function Layout() {
         background: '#fefefe'
       }}>
         <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ 
-            fontSize: '24px', 
-            fontWeight: '700', 
-            color: '#0f172a', 
-            marginBottom: '8px',
-            margin: 0
-          }}>
-            Contractor Site Builder
-          </h1>
-          <p style={{ 
-            color: '#64748b', 
-            fontSize: '16px',
-            margin: '8px 0 0 0'
-          }}>
-            Create stunning websites by chatting with AI
-          </p>
+          <div style={{ marginBottom: '16px' }}>
+            <h1 style={{ 
+              fontSize: '28px', 
+              fontWeight: '700', 
+              color: '#0f172a', 
+              margin: 0,
+              background: 'linear-gradient(135deg, #1e40af, #06b6d4)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              lineHeight: '1.2'
+            }}>
+              Local Service Business Website Builder
+            </h1>
+            <p style={{ 
+              color: '#64748b', 
+              fontSize: '16px',
+              margin: '8px 0 0 0'
+            }}>
+              Free professional websites for local service providers
+            </p>
+          </div>
         </div>
         
-        <div style={{ 
-          marginBottom: '24px', 
-          padding: '20px',
-          background: '#f8fafc',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0'
-        }}>
-          <h3 style={{ 
-            fontSize: '16px', 
-            fontWeight: '600', 
-            color: '#334155', 
-            marginBottom: '12px',
-            margin: '0 0 12px 0'
-          }}>
-            Get started:
-          </h3>
-          <p style={{ 
-            color: '#64748b', 
-            fontSize: '14px',
-            marginBottom: '12px',
-            margin: '0 0 12px 0'
-          }}>
-            Tell us about your contracting business:
-          </p>
-          <ul style={{ 
-            margin: '0', 
-            padding: '0 0 0 20px',
-            color: '#475569',
-            fontSize: '14px',
-            lineHeight: '1.6'
-          }}>
-            <li>Business name</li>
-            <li>Services you offer</li>
-            <li>Service areas</li>
-            <li>Contact information</li>
-            <li>Operating hours</li>
-          </ul>
-        </div>
-        
-        <ChatBox setSiteHtml={setSiteHtml} />
+        <GuidedChatBox setSiteHtml={setSiteHtml} />
       </div>
       
       {/* Right: Live Preview */}
