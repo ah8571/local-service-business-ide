@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connectionism - Local Service Business Website Builder</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Left Panel: Chat Interface -->
+        <div class="left-panel">
+            <div class="header">
+                <h1 class="title">Connectionism</h1>
+                <p class="subtitle">Our AI-Powered Website Builder for Local Service Businesses</p>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="chat-container" id="chat-container">
+                <!-- ChatBox component will be rendered here -->
+            </div>
+
+            <!-- Business Form Container -->
+            <div id="form-container">
+                <!-- BusinessForm component will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Right Panel: Preview -->
+        <div class="right-panel">
+            <div id="preview-container">
+                <!-- SitePreview component will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Component Scripts -->
+    <script src="js/services/api-service.js" onerror="console.error('Failed to load api-service.js')"></script>
+    <script src="js/components/chatbox.js" onerror="console.error('Failed to load chatbox.js')"></script>
+    <script src="js/components/business-form.js" onerror="console.error('Failed to load business-form.js')"></script>
+    <script src="js/components/site-preview.js" onerror="console.error('Failed to load site-preview.js')"></script>
+    
+    <!-- Main App Controller -->
+    <script src="js/app.js" onerror="console.error('Failed to load app.js')"></script>
+    
+    <script>
+        // Debug script loading
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, checking components...');
+            console.log('APIService available:', typeof APIService !== 'undefined');
+            console.log('ChatBox available:', typeof ChatBox !== 'undefined');
+            console.log('BusinessForm available:', typeof BusinessForm !== 'undefined');
+            console.log('SitePreview available:', typeof SitePreview !== 'undefined');
+            console.log('WebsiteBuilderApp available:', typeof WebsiteBuilderApp !== 'undefined');
+        });
+    </script>
+</body>
+</html>
