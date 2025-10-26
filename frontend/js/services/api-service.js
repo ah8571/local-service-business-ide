@@ -17,7 +17,7 @@ class APIService {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), this.defaultTimeout);
             
-            const response = await fetch('/api/generate-website', {
+            const response = await fetch('/api/generate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ class APIService {
         }
     }
 
-    async sendChatMessage(message, aiAgent, businessData = null) {
+    async sendChatMessage(message, aiAgent, businessData = null, imageData = null) {
         console.log('Sending chat message to AI agent:', aiAgent);
         
         try {
@@ -80,6 +80,11 @@ class APIService {
             // Include business data if available
             if (businessData) {
                 requestBody.businessData = businessData;
+            }
+            
+            // Include image data if available
+            if (imageData) {
+                requestBody.imageData = imageData;
             }
 
             const response = await fetch('/api/chat', {
@@ -151,7 +156,11 @@ ${businessData.location ? `- Address: ${businessData.location}` : ''}
 ${businessData.email ? `- Email: ${businessData.email}` : ''}
 ${businessData.hours ? `- Hours: ${businessData.hours}` : ''}
 
-IMPORTANT: Please respond with ONLY the complete HTML code. Start with <!DOCTYPE html> and end with </html>. Do not include any explanations, code blocks, or markdown formatting - just the raw HTML code that can be directly used in a browser.
+IMPORTANT REQUIREMENTS:
+- Use current year (2025) for any copyright notices
+- Create a modern, professional design
+- Include responsive design and mobile optimization
+- Please respond with ONLY the complete HTML code. Start with <!DOCTYPE html> and end with </html>. Do not include any explanations, code blocks, or markdown formatting - just the raw HTML code that can be directly used in a browser.
 
 The website should include:
 - Professional header with ${businessData.businessName}
@@ -162,6 +171,7 @@ The website should include:
 - Professional styling with embedded CSS
 - Call-to-action buttons
 - Local business optimization
+- Use current year (2025) for any copyright notices
 
 Return ONLY the HTML code, nothing else.`;
     }

@@ -368,6 +368,31 @@ select option:disabled {
     flex-direction: column;
 }
 
+/* Image Upload Styles */
+#imageButton {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#imageButton:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+#imagePreview {
+    font-size: 12px;
+    color: #64748b;
+    padding: 4px 8px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
 /* Utility Classes */
 .sr-only {
     position: absolute;

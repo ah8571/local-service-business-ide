@@ -1,4 +1,5 @@
 // Simple LLM Router with API key support
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const axios = require('axios');
 
 class LLMRouter {
@@ -44,7 +45,7 @@ class LLMRouter {
         console.log(`Available providers: ${available.length > 0 ? available.join(', ') : 'None (add API keys to .env)'}`);
     }
 
-    async callProvider(providerKey, prompt) {
+    async callProvider(providerKey, prompt, imageData = null) {
         const provider = this.providers[providerKey];
         
         if (!provider) {
@@ -59,11 +60,11 @@ class LLMRouter {
 
         try {
             if (providerKey === 'claude') {
-                return await this.callClaude(prompt, provider);
+                return await this.callClaude(prompt, provider, imageData);
             } else if (providerKey === 'gemini') {
-                return await this.callGemini(prompt, provider);
+                return await this.callGemini(prompt, provider, imageData);
             } else {
-                return await this.callOpenAIStyle(prompt, provider);
+                return await this.callOpenAIStyle(prompt, provider, imageData);
             }
         } catch (error) {
             // Don't fall back to mock - throw the actual error for better debugging
@@ -86,10 +87,28 @@ class LLMRouter {
         return keyNames[providerKey] || 'API_KEY';
     }
 
-    async callOpenAIStyle(prompt, provider) {
+    async callOpenAIStyle(prompt, provider, imageData = null) {
+        // Prepare message content
+        let messageContent = prompt;
+        if (imageData && (provider.model.includes('gpt-4') || provider.model.includes('grok'))) {
+            // OpenAI/Grok vision format
+            messageContent = [
+                {
+                    type: 'text',
+                    text: prompt
+                },
+                {
+                    type: 'image_url',
+                    image_url: {
+                        url: `data:${imageData.mimeType || 'image/jpeg'};base64,${imageData.data}`
+                    }
+                }
+            ];
+        }
+
         const response = await axios.post(provider.endpoint, {
             model: provider.model,
-            messages: [{ role: 'user', content: prompt }],
+            messages: [{ role: 'user', content: messageContent }],
             max_tokens: 4000,
             temperature: 0.7
         }, {
@@ -106,11 +125,31 @@ class LLMRouter {
         };
     }
 
-    async callClaude(prompt, provider) {
+    async callClaude(prompt, provider, imageData = null) {
+        // Prepare message content
+        let messageContent = prompt;
+        if (imageData) {
+            // Claude vision format
+            messageContent = [
+                {
+                    type: 'text',
+                    text: prompt
+                },
+                {
+                    type: 'image',
+                    source: {
+                        type: 'base64',
+                        media_type: imageData.mimeType || 'image/jpeg',
+                        data: imageData.data // Use the base64 data directly from the object
+                    }
+                }
+            ];
+        }
+
         const response = await axios.post(provider.endpoint, {
             model: provider.model,
             max_tokens: 4000,
-            messages: [{ role: 'user', content: prompt }]
+            messages: [{ role: 'user', content: messageContent }]
         }, {
             headers: {
                 'x-api-key': provider.apiKey,
@@ -126,12 +165,25 @@ class LLMRouter {
         };
     }
 
-    async callGemini(prompt, provider) {
+    async callGemini(prompt, provider, imageData = null) {
         const url = `${provider.endpoint}?key=${provider.apiKey}`;
+        
+        // Prepare parts array
+        const parts = [{ text: prompt }];
+        
+        if (imageData) {
+            // Gemini vision format
+            parts.push({
+                inline_data: {
+                    mime_type: imageData.mimeType || 'image/jpeg',
+                    data: imageData.data // Use the base64 data directly from the object
+                }
+            });
+        }
         
         const response = await axios.post(url, {
             contents: [{
-                parts: [{ text: prompt }]
+                parts: parts
             }]
         }, {
             headers: {
