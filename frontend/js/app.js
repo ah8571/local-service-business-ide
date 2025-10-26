@@ -120,12 +120,15 @@ class WebsiteBuilderApp {
                 </div>
                 <br>
                 <div style="color: #64748b; font-size: 13px; margin-top: 8px;">⏱️ This may take 1-2 minutes for complex websites. Please wait...</div>
-            `, false);
+            `, false, true); // Mark as loading message
 
             // Generate website
             const result = await this.services.api.generateWebsite(businessData, prompt);
 
             if (result.success) {
+                // Remove loading messages before showing success
+                this.components.chatBox.removeLoadingMessages();
+                
                 // Update preview with generated HTML
                 this.components.sitePreview.updatePreview(result.data.html);
 
@@ -137,12 +140,18 @@ class WebsiteBuilderApp {
                 this.components.chatBox.addMessage(successMessage, false);
 
             } else {
+                // Remove loading messages before showing error
+                this.components.chatBox.removeLoadingMessages();
+                
                 // Handle error
                 this.handleGenerationError(result);
             }
 
         } catch (error) {
             console.error('Error during form submission:', error);
+            // Remove loading messages before showing error
+            this.components.chatBox.removeLoadingMessages();
+            
             this.components.chatBox.addMessage(
                 this.services.api.formatErrorMessage('Unexpected error during website generation', 'connection'),
                 false
