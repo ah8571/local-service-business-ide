@@ -13,7 +13,7 @@ A web-based IDE that helps local service business owners create, customize, and 
 ## Tech Stack
 
 - **Backend:** Node.js (Express), LLM integration
-- **Frontend:** React (for the IDE/chat UI)
+- **Frontend:** Vanilla HTML/CSS/JavaScript (modern, lightweight UI)
 - **Generated Sites:** Static HTML/CSS (with optional JS)
 - **Hosting Integration:** Planned for Netlify, Vercel, or GitHub Pages
 
@@ -38,27 +38,15 @@ A web-based IDE that helps local service business owners create, customize, and 
    npm install
    ```
 
-3. Install frontend dependencies:
-   ```bash
-   cd ../frontend
-   npm install
-   ```
-
 ### Running the Application
 
-1. Start the backend server:
+1. Start the backend server (serves both API and frontend):
    ```bash
    cd backend
-   node app.js
+   node app-working.js
    ```
 
-2. In a new terminal, start the frontend:
-   ```bash
-   cd frontend
-   npm start
-   ```
-
-3. Open your browser and navigate to `http://localhost:3000`
+2. Open your browser and navigate to `http://localhost:5000`
 
 ## Usage
 
