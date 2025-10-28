@@ -30,7 +30,7 @@ body {
     display: flex;
     flex-direction: column;
     background: #fefefe;
-    overflow-y: auto;
+    overflow: hidden;
 }
 
 .right-panel {
@@ -70,7 +70,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 200px);
+    min-height: 0;
 }
 
 .messages {
@@ -79,8 +79,7 @@ body {
     padding: 24px 20px;
     background: #ffffff;
     border-radius: 12px;
-    min-height: 300px;
-    max-height: calc(100vh - 350px);
+    min-height: 200px;
     border: 1px solid #f1f5f9;
     display: flex;
     flex-direction: column;
@@ -343,11 +342,13 @@ select option:disabled {
     }
     
     .chat-container {
-        height: calc(50vh - 150px);
+        min-height: 300px;
+        flex: 1;
     }
     
     .messages {
-        max-height: calc(50vh - 200px);
+        min-height: 200px;
+        flex: 1;
     }
 }
 

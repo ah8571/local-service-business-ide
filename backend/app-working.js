@@ -22,6 +22,9 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Serve static files from frontend directory
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+// Serve temporary assets for website previews
+app.use('/assets', express.static(path.join(__dirname, '../generated_sites/temp_assets')));
+
 // Business generation endpoint
 app.post('/api/generate', async (req, res) => {
     try {
@@ -122,24 +125,59 @@ IMPORTANT INSTRUCTIONS:
 - For images, use placeholder URLs like "images/hero-image.jpg" or "assets/logo.png" with appropriate alt text
 - Always provide the complete updated HTML code in the specified format`;
 
-        // Add image context if image is provided
+        // Handle image data efficiently to avoid rate limits
+        let imagePath = null;
         if (imageData) {
-            enhancedPrompt += `
+            // Save image file locally and use file reference instead of sending full data to AI
+            const fs = require('fs').promises;
+            const crypto = require('crypto');
+            
+            try {
+                // Create unique filename
+                const imageId = crypto.randomBytes(8).toString('hex');
+                const extension = imageData.mimeType ? imageData.mimeType.split('/')[1] : 'jpg';
+                const fileName = `uploaded-${imageId}.${extension}`;
+                imagePath = `assets/${fileName}`;
+                
+                // Ensure assets directory exists
+                const assetsDir = path.join(__dirname, '../generated_sites/temp_assets');
+                await fs.mkdir(assetsDir, { recursive: true });
+                
+                // Save image file
+                const imageBuffer = Buffer.from(imageData.data, 'base64');
+                await fs.writeFile(path.join(assetsDir, fileName), imageBuffer);
+                
+                console.log(`✅ Image saved: ${fileName}`);
+                
+                // Add efficient image context for AI (no base64 data)
+                enhancedPrompt += `
 
-IMPORTANT - Image Integration: You have been provided with an image that needs to be embedded in the website.
-1. Use this EXACT data URI for the image: data:${imageData.mimeType || 'image/jpeg'};base64,${imageData.data}
-2. Create IMG tags using the data URI as the src attribute
-3. Add appropriate alt text describing what you see in the image
-4. Position the image appropriately (hero section, about section, etc.)
-5. Apply proper styling (responsive, styled dimensions, etc.)
-6. Tell the user directly what you've done with their image
+IMPORTANT - Image Integration: The user has uploaded an image that should be incorporated into the website.
+1. Use this image path: "${imagePath}"
+2. Create an IMG tag: <img src="${imagePath}" alt="[descriptive alt text]" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;">
+3. Position the image appropriately (hero section, gallery, etc.)
+4. Apply proper responsive styling
+5. Tell the user what you've done with their image
 
-Example: <img src="data:${imageData.mimeType || 'image/jpeg'};base64,${imageData.data}" alt="[describe the image]" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;">`;
+The image has been saved and is ready to use in the website.`;
+
+            } catch (imageError) {
+                console.log('❌ Image processing error:', imageError.message);
+                // Fallback to data URI if file saving fails
+                enhancedPrompt += `
+
+IMPORTANT - Image Integration: You have been provided with an image.
+1. Use this data URI: data:${imageData.mimeType || 'image/jpeg'};base64,${imageData.data.substring(0, 100)}...[truncated]
+2. Create IMG tags using "assets/uploaded-image.jpg" as placeholder path
+3. Tell the user the image will be included when they download the website`;
+            }
         }
 
         let response;
         try {
-            response = await llmRouter.callProvider(aiAgent, enhancedPrompt, imageData);
+            // Only send imageData to AI if we couldn't save the file locally
+            const aiImageData = imagePath ? null : imageData;
+            response = await llmRouter.callProvider(aiAgent, enhancedPrompt, aiImageData);
         } catch (providerError) {
             console.log('AI provider error for chat:', providerError.message);
             
@@ -175,6 +213,22 @@ Example: <img src="data:${imageData.mimeType || 'image/jpeg'};base64,${imageData
             
             console.log('Extracted HTML length:', extractedHtml ? extractedHtml.length : 0);
             console.log('Extracted explanation length:', explanation ? explanation.length : 0);
+            
+            // Debug: Check what image references Gemini created
+            if (extractedHtml && imageData) {
+                const imgTags = extractedHtml.match(/<img[^>]*src="([^"]*)"[^>]*>/gi);
+                if (imgTags) {
+                    console.log('🖼️  Gemini created image tags:', imgTags.length);
+                    imgTags.forEach((tag, i) => {
+                        const srcMatch = tag.match(/src="([^"]*)"/);
+                        if (srcMatch) {
+                            console.log(`   Image ${i + 1}: ${srcMatch[1]}`);
+                        }
+                    });
+                } else {
+                    console.log('⚠️  No image tags found in Gemini response despite image upload');
+                }
+            }
             
             if (extractedHtml) {
                 // This is a website update with HTML

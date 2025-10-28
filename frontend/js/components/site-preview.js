@@ -228,13 +228,13 @@ class SitePreview {
             const zip = new JSZip();
             const assetsFolder = zip.folder('assets');
             
-            // Process HTML to extract and replace base64 images
+            // Process HTML to extract and include images (both base64 and file paths)
             let processedHtml = this.originalHtml;
-            const base64ImageRegex = /src="data:image\/(png|jpg|jpeg|gif|webp|svg\+xml);base64,([^"]+)"/gi;
             let imageCounter = 1;
-            let match;
 
-            // Extract all base64 images and create files
+            // 1. Handle base64 images (legacy)
+            const base64ImageRegex = /src="data:image\/(png|jpg|jpeg|gif|webp|svg\+xml);base64,([^"]+)"/gi;
+            let match;
             while ((match = base64ImageRegex.exec(this.originalHtml)) !== null) {
                 const [fullMatch, extension, base64Data] = match;
                 const fileName = `image-${imageCounter}.${extension === 'svg+xml' ? 'svg' : extension}`;
@@ -251,12 +251,44 @@ class SitePreview {
                 
                 // Replace base64 src with local file path
                 processedHtml = processedHtml.replace(fullMatch, `src="assets/${fileName}"`);
-                
                 imageCounter++;
+            }
+
+            // 2. Handle asset file paths (new system)
+            const assetPathRegex = /src="assets\/([^"]+)"/gi;
+            const assetMatches = [...this.originalHtml.matchAll(assetPathRegex)];
+            
+            for (const assetMatch of assetMatches) {
+                const [fullMatch, fileName] = assetMatch;
+                console.log(`📁 Found asset reference: ${fileName}`);
+                
+                try {
+                    // Fetch the actual image file from server
+                    const response = await fetch(`/assets/${fileName}`);
+                    if (response.ok) {
+                        const imageBlob = await response.blob();
+                        const imageBuffer = await imageBlob.arrayBuffer();
+                        
+                        // Add actual image file to assets folder
+                        assetsFolder.file(fileName, imageBuffer);
+                        console.log(`✅ Added ${fileName} to zip`);
+                    } else {
+                        console.log(`❌ Could not fetch ${fileName}: ${response.status}`);
+                    }
+                } catch (fetchError) {
+                    console.log(`❌ Error fetching ${fileName}:`, fetchError.message);
+                }
             }
 
             // Add the main HTML file
             zip.file('index.html', processedHtml);
+            
+            // Log what assets were included
+            const assetsInZip = Object.keys(assetsFolder.files);
+            console.log(`📦 Assets included in zip: ${assetsInZip.length > 0 ? assetsInZip.join(', ') : 'none'}`);
+            if (assetsInZip.length === 0) {
+                console.log('⚠️  No assets found - check if images are properly referenced');
+            }
             
             // Create README file with instructions
             const readmeContent = `# Your Website Package
