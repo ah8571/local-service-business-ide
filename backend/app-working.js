@@ -9,7 +9,7 @@ const cors = require('cors');
 const LLMRouter = require('./services/simple-llmRouter');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 9999;
 
 // Initialize LLM Router
 const llmRouter = new LLMRouter();
@@ -345,6 +345,16 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
+// Error handling
+process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+    // Don't exit - let the server continue running
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
@@ -353,4 +363,6 @@ app.listen(PORT, () => {
     console.log('  - POST /api/generate (business website generation)');
     console.log('  - POST /api/chat (website editing with images)');  
     console.log('  - GET /api/test-ai (test AI connectivity)');
+}).on('error', (err) => {
+    console.error('❌ Server error:', err);
 });
